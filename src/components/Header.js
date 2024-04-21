@@ -1,24 +1,11 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { TopItems } from './TopItems';
 
 export const Header = () => {
-  const [buttonState, setButtonState] = useState(false);
-
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => setButtonState(!buttonState)}
-      >
-        <Text
-          style={[
-            styles.buttonText,
-            { color: buttonState ? 'red' : '#007AFF' },
-          ]}
-        >
-          {buttonState ? 'Cancel' : 'Edit'}
-        </Text>
-      </TouchableOpacity>
+      <TopItems />
       <Text style={styles.headerText}>Todo's</Text>
     </View>
   );
@@ -31,9 +18,5 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 48,
     marginBottom: 16,
-  },
-  editButton: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: 16,
   },
 });
