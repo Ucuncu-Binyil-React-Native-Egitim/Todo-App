@@ -1,13 +1,11 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  deleteTodo,
-  editTodo,
-  toggleComplete,
-} from '../store/features/todoSlice';
+import { deleteTodo } from '../store/features/todoSlice';
 import { useActionSheet } from '@expo/react-native-action-sheet';
+import { deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { FIREBASE_DB } from '../../firebaseConfig';
 
 export const TodoItem = ({ data, range }) => {
   const isLastItem = data.index + 1 === range;
@@ -15,6 +13,25 @@ export const TodoItem = ({ data, range }) => {
   const isDone = data.item.completed;
   const topItems = useSelector((state) => state.topItems);
   const { showActionSheetWithOptions } = useActionSheet();
+
+  const toggleTodo = async () => {
+    try {
+      await updateDoc(doc(FIREBASE_DB, 'todos', data.item.id), {
+        completed: !data.item.completed,
+      });
+      console.log(`[${data.item.id}] completed as [${!data.item.completed}]`);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const deleteTodo = async () => {
+    try {
+      await deleteDoc(doc(FIREBASE_DB, 'todos', data.item.id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onLongPress = () => {
     const options = ['Edit', 'Delete', 'Cancel'];
@@ -30,11 +47,10 @@ export const TodoItem = ({ data, range }) => {
       (selectedIndex) => {
         switch (selectedIndex) {
           case 0:
-            // edit func
             break;
 
           case destructiveButtonIndex:
-            dispatch(deleteTodo(data.item.id));
+            deleteTodo();
             break;
 
           case cancelButtonIndex:
@@ -47,7 +63,7 @@ export const TodoItem = ({ data, range }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={() => dispatch(toggleComplete(data.item.id))}
+      onPress={toggleTodo}
       onLongPress={onLongPress}
       style={[
         styles.container,
@@ -61,12 +77,16 @@ export const TodoItem = ({ data, range }) => {
     >
       <View style={styles.innerContainer}>
         <Ionicons
-          name={isDone ? 'checkmark-circle' : 'checkmark-circle-outline'}
+          name={
+            data.item.completed
+              ? 'checkmark-circle'
+              : 'checkmark-circle-outline'
+          }
           size={24}
-          color='black'
+          color='#007aFF'
         />
         <View style={styles.textContainer}>
-          <Text style={styles.itemText}>{data.item.text}</Text>
+          <Text style={styles.itemText}>{data.item.title}</Text>
           <Text style={styles.itemDateText}>{data.item.createdAt}</Text>
         </View>
       </View>
